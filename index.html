@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>选择您的收获地址</title>
+</head>
+<!-- 引入bootstrap 给默认的下拉框优化用的  -->
+<link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.css" rel="stylesheet">
+
+<body>
+   <div>
+          	<select id="sheng">
+                <option>请选择省</option>
+            </select>
+	          <select id="shi"></select>
+	          <select id="xian"></select>
+	          <select id="zhen"></select>
+   </div>
+
+<!--引入jquery-->
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+
+<script type="text/javascript">
+  
+  var amapkey="4d58c57a360b45c576068687abe2fc58";  //高德地图的开发key 填写自己的即可。
+
+	$(function(){
+		//在进入页面的时候 省默认写死
+		var provinceList = ['北京市', '天津市', '河北省', '山西省', '内蒙古自治区', '辽宁省', '吉林省','黑龙江省', '上海市', '江苏省', '浙江省', '安徽省', '福建省', '江西省', '山东省','河南省', '湖北省', '湖南省', '广东省', '广西壮族自治区', '海南省', '重庆市','四川省', '贵州省', '云南省', '内蒙古自治区', '陕西省', '甘肃省', '青海省', '宁夏回族自治区', '新疆维吾尔自治区', '澳门特别行政区'];     
+
+    var shengHtml="";
+		for (var i = 0; i < provinceList.length; i++) {
+			shengHtml+='<option value="'+provinceList[i]+'">'+provinceList[i]+'</option>';
+		}
+	  $("#sheng").append(shengHtml);
+
+
+	  //查询第二级
+       $("#sheng").change(function(){
+
+          //删除之前所选择的
+          $("#shi").find("option").remove();
+          $("#xian").find("option").remove();
+          $("#zhen").find("option").remove();
+
+       	var shihtml="<option value='请选择'>请选择市</option>";
+       	var shengval=$(this).val();
+       	   $.ajax({
+         		type:"post",
+         		url:"https://restapi.amap.com/v3/config/district?subdistrict=1&key="+amapkey+"&keywords="+shengval,
+         		dataType:"jsonp",
+         		success:function(data){ 	
+                   $.each(data.districts,function(i,cityvalue){   
+                         $.each(cityvalue.districts,function(cityi,city){
+                              shihtml+='<option value="'+ city.name+'">'+ city.name+'</option>';
+                         })
+                         $("#shi").append(shihtml);	
+                   })
+         		}
+         	})
+       })
+
+
+     //查询县 第三级
+        $("#shi").change(function(){ 
+
+           var xianHtml="<option value='请选择'>请选择县/区</option>";       
+           var $shival=$(this).val();
+           $("#zhen").find("option").remove();
+           $("#xian").find("option").remove();
+     
+        $.ajax({
+        	type:"post",
+        	url:"https://restapi.amap.com/v3/config/district?subdistrict=1&key="+amapkey+"&keywords="+$shival,
+          dataType:"jsonp",
+          success:function(data){
+            	$.each(data.districts,function(i,countyvalue){
+            		 $.each(countyvalue.districts,function(countyi,county){
+            		    	xianHtml+='<option value="'+ county.name+'">'+ county.name+'</option>';           			
+            	  	})
+            	$("#xian").append(xianHtml);
+            	})
+            }
+        })    
+     })
+
+    //遍历第四级
+    $("#xian").change(function(){
+       $("#zhen").find("option").remove();
+      	var $zhenval=$(this).val();
+        var xiangHtml="<option value='请选择'>请选择镇/街道</option>";
+        $.ajax({
+        	type:"post",
+        	url:"https://restapi.amap.com/v3/config/district?subdistrict=1&key="+amapkey+"&keywords="+$zhenval,
+        	dataType:"jsonp",
+        	success:function(data){
+        		$.each(data.districts,function(i,streetvalue){
+                   $.each(streetvalue.districts,function(streetI,street){
+                   	 xiangHtml+='<option value="'+ street.name+'">'+ street.name+'</option>';  
+                })
+            $("#zhen").append(xiangHtml);      
+        		});
+        	}
+        }) 
+    })
+	})
+</script>
+
+
+</body>
+</html>
