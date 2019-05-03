@@ -3,7 +3,19 @@
 
 官方的文档 : [点我](https://lbs.amap.com/api/webservice/guide/api/district)
 
-首先  先说明:
+代码的演示地址 : [点我](https://a2501521908.github.io/address/index.html)
+
+使用高德的接口需要创建自己的应用并且申请 **Web服务** 然后再代码中
+
+```html
+var amapkey="";  //高德地图的开发key 填写自己的即可。
+```
+
+把key赋值给这个变量就可以啦！
+
+
+
+说明:
 
 1.我这个方法说不定不是最简单的,因为本人不精通JavaScript
 
@@ -11,6 +23,3 @@
 
 ![](https://ww1.sinaimg.cn/large/005BYqpggy1g2mr7hnlcnj30sc06gtbn.jpg)
 
-3. 需要在代码 上配置自己的高德地图的key,创建应用申请: [点我](https://lbs.amap.com/)
-
-​       需要修改的地方,可以看代码的注释。
