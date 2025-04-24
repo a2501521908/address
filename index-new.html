@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>选择您的收货地址</title>
+    <!-- 引入bootstrap优化样式 -->
+    <link href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.css" rel="stylesheet">
+</head>
+<body>
+   <div>
+       <select id="sheng">
+           <option>请选择省</option>
+       </select>
+       <select id="shi">
+           <option>请选择市</option>
+       </select>
+       <select id="xian">
+           <option>请选择县/区</option>
+       </select>
+       <select id="zhen">
+           <option>请选择镇/街道</option>
+       </select>
+   </div>
+
+   <!--引入jquery-->
+   <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+
+   <script type="text/javascript">
+       const amapkey = ""; // 高德地图的开发key
+
+       // 初始化省级列表
+       const provinceList = [
+           '北京市', '天津市', '河北省', '山西省', '内蒙古自治区', '辽宁省', '吉林省', '黑龙江省',
+           '上海市', '江苏省', '浙江省', '安徽省', '福建省', '江西省', '山东省', '河南省', '湖北省',
+           '湖南省', '广东省', '广西壮族自治区', '海南省', '重庆市', '四川省', '贵州省', '云南省',
+           '陕西省', '甘肃省', '青海省', '宁夏回族自治区', '新疆维吾尔自治区', '澳门特别行政区'
+       ];
+
+       function populateDropdown(selector, options) {
+           const html = options.map(option => `<option value="${option}">${option}</option>`).join('');
+           $(selector).html(`<option value="请选择">请选择</option>` + html);
+       }
+
+       function fetchDistricts(keywords, targetSelector) {
+           $.ajax({
+               type: "post",
+               url: `https://restapi.amap.com/v3/config/district?subdistrict=1&key=${amapkey}&keywords=${keywords}`,
+               dataType: "jsonp",
+               beforeSend: function() {
+                   $(targetSelector).html("<option>加载中...</option>").prop("disabled", true);
+               },
+               success: function(data) {
+                   const options = [];
+                   data.districts.forEach(district => {
+                       district.districts.forEach(subDistrict => {
+                           options.push(subDistrict.name);
+                       });
+                   });
+                   populateDropdown(targetSelector, options);
+                   $(targetSelector).prop("disabled", false);
+               },
+               error: function() {
+                   $(targetSelector).html("<option>加载失败，请重试</option>").prop("disabled", false);
+               }
+           });
+       }
+
+       $(function() {
+           // 初始化省
+           populateDropdown("#sheng", provinceList);
+
+           $("#sheng").change(function() {
+               $("#shi, #xian, #zhen").html("<option value='请选择'>请选择</option>").prop("disabled", true);
+               const province = $(this).val();
+               if (province !== "请选择") fetchDistricts(province, "#shi");
+           });
+
+           $("#shi").change(function() {
+               $("#xian, #zhen").html("<option value='请选择'>请选择</option>").prop("disabled", true);
+               const city = $(this).val();
+               if (city !== "请选择") fetchDistricts(city, "#xian");
+           });
+
+           $("#xian").change(function() {
+               $("#zhen").html("<option value='请选择'>请选择</option>").prop("disabled", true);
+               const county = $(this).val();
+               if (county !== "请选择") fetchDistricts(county, "#zhen");
+           });
+       });
+   </script>
+</body>
+</html>
